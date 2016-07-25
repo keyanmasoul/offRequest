@@ -15,7 +15,7 @@ OffRequest.getInstance().init(this);
 public class DefaultOffDbImpl implements OffDbImpl<RequestBean> {
     @Override
     public void save(RequestBean requestBean) {
-        MainActivity.liteOrm.save(requestBean);
+
     }
 
     @Override
@@ -25,7 +25,7 @@ public class DefaultOffDbImpl implements OffDbImpl<RequestBean> {
 
     @Override
     public List queryAll(OffRequest offRequest) {
-        return MainActivity.liteOrm.query(RequestBean.class);
+
     }
 
 }
