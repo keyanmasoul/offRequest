@@ -33,8 +33,9 @@ public class DefaultOffDbImpl implements OffDbImpl<RequestBean> {
 OffRequest.getInstance().setDb(new DefaultOffDbImpl());
 ```
 
-## 3 添加请求(请求参数,数据源,请求url,fakeCallback,ServerResponse实现)
+## 3 添加请求
 ```java
+//请求参数,数据源,请求url,fakeCallback,ServerResponse实现
 OffRequest.getInstance().add(params, user, url, new OffCallback() {
             @Override
             public void success(OffResponse response) {
@@ -53,5 +54,5 @@ public class UserOffResponseImpl implements ImplOffResponse {
 备注
 ----
 简单的离线网络请求实现,复杂得多部请求需自行实现.
-下个版本:网络层剥离
+下个版本:网络状态判断,网络层剥离
 
