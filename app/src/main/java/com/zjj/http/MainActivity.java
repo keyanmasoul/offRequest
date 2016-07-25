@@ -75,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements IHandlerDo {
                             "test");
                 }
             });
+        if (liteOrm == null) {
+            liteOrm = LiteOrm.newSingleInstance(MainActivity.this, "liteOrm.db");
+            liteOrm.setDebugged(true);
+        }
         OffRequest.getInstance().init(this, new DefaultOffDbImpl());
         WeakHandler handler = new WeakHandler(this);
 
@@ -153,10 +157,6 @@ public class MainActivity extends AppCompatActivity implements IHandlerDo {
                 user = JSON.parseObject(response.getData(), User.class);
                 UserManager.getInstance().setUser(user);
                 setUserInfo();
-                if (liteOrm == null) {
-                    liteOrm = LiteOrm.newSingleInstance(MainActivity.this, user.getUserId() + ".db");
-                    liteOrm.setDebugged(true);
-                }
             }
 
             @Override
