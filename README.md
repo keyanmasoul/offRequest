@@ -1,16 +1,13 @@
-================
+----
 OffRequest  离线请求提交最简版
-================
+----
 
 
 使用方法
 
 
-## 1 初始化
-```java
-OffRequest.getInstance().init(this);
-```
-## 2 数据库实现
+## 1 数据库实现及初始化
+
 ```java
 public class DefaultOffDbImpl implements OffDbImpl<RequestBean> {
     @Override
@@ -27,27 +24,38 @@ public class DefaultOffDbImpl implements OffDbImpl<RequestBean> {
     public List queryAll(OffRequest offRequest) {
 
     }
-
 }
 
-OffRequest.getInstance().setDb(new DefaultOffDbImpl());
 ```
 
-## 3 添加请求
+```java
+//onCreate
+OffRequest.getInstance().init(this,new DefaultOffDbImpl());
+```
+
+## 2 请求添加
 ```java
 //请求参数,数据源,请求url,fakeCallback,ServerResponse实现
 OffRequest.getInstance().add(params, user, url, new OffCallback() {
-            @Override
-            public void success(OffResponse response) {
-                
-            }
-        }, new UserOffResponseImpl());
+		@Override
+		public void success(OffResponse response) {
+		
+		}
+	}, new UserOffResponseImpl());
 		
 public class UserOffResponseImpl implements ImplOffResponse {
     @Override
     public void handleResponse(Object o) {
-
     }
+}
+```
+
+## 3 资源释放
+```java
+@Override
+protected void onDestroy() {
+	super.onDestroy();
+	OffRequest.getInstance().release();
 }
 ```
 
@@ -61,4 +69,8 @@ public class UserOffResponseImpl implements ImplOffResponse {
 ----
 简单的离线网络请求实现,复杂得多部请求需自行实现.
 下个版本:网络状态判断,网络层剥离
+
+更新
+----
+v1.0.1 添加网络状态监测
 

@@ -1,9 +1,14 @@
 package com.zjj.http.offqueue;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.util.Log;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.alibaba.fastjson.JSON;
+import com.litesuits.android.log.Log;
 import com.zjj.http.BaseBean;
 import com.zjj.http.MainActivity;
 import com.zjj.http.volley.VolleyCallback;
@@ -21,6 +26,7 @@ import java.util.Map;
  * Created by zjj on 2016/7/14.
  */
 public class OffRequest {
+    private static final String TAG = "OffRequest";
     private volatile static OffRequest mInstance;
 
     private Context mContext;
@@ -38,8 +44,30 @@ public class OffRequest {
         return mInstance;
     }
 
-    public void init(Context context) {
+    private ConnectionChangerReceiver receiver;
+
+    public void init(Context context, OffDbImpl db) {
+        if (mContext != null) {
+            return;
+        }
+        if (db == null) {
+            Log.e(TAG, "DbImpl must not be null");
+        }
         mContext = context;
+        setDb(db);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        receiver = new ConnectionChangerReceiver();
+        mContext.registerReceiver(receiver, filter);
+
+    }
+
+    //与init相对应,release后需重新init
+    public void release() {
+        mContext.unregisterReceiver(receiver);
+        mContext = null;
+        this.db = null;
+        mInstance = null;
     }
 
     public void setDb(OffDbImpl db) {
@@ -53,7 +81,7 @@ public class OffRequest {
         }
         //生成修改后的数据
         for (Map.Entry<String, String> entry : param.entrySet()) {
-            toEdit(scoure, entry.getKey(), entry.getValue());
+            editScoure(scoure, entry.getKey(), entry.getValue());
         }
         OffResponse response = new OffResponse();
         response.setData(JSON.toJSONString(scoure));
@@ -72,9 +100,14 @@ public class OffRequest {
         readyToSend();
     }
 
-    private List<RequestBean> list;
+    private List list;
 
     private void readyToSend() {
+        if (!networkState) {
+            Log.e(TAG, "no network!");
+            list = null;
+            return;
+        }
         list = db.queryAll(mInstance);
         //还原发送请求
         sendOffRequest();
@@ -82,7 +115,9 @@ public class OffRequest {
 
     private void sendOffRequest() {
         if (list != null && list.size() > 0) {
-            commit(list.get(0));
+            if (list.get(0) instanceof RequestBean) {
+                commit((RequestBean) list.get(0));
+            }
         }
     }
 
@@ -135,7 +170,7 @@ public class OffRequest {
         });
     }
 
-    private BaseBean toEdit(BaseBean bean, String key, String value) {
+    private BaseBean editScoure(BaseBean bean, String key, String value) {
         try {
             Field mField = bean.getClass().getDeclaredField(key);
             if (mField != null) {
@@ -148,6 +183,28 @@ public class OffRequest {
             e.printStackTrace();
         }
         return bean;
+    }
+
+    private boolean networkState;
+
+    public void setNetwordState(boolean state) {
+        this.networkState = state;
+        readyToSend();
+    }
+
+    class ConnectionChangerReceiver extends BroadcastReceiver {
+
+        private final String TAG = ConnectionChangerReceiver.class.getSimpleName();
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "Network state change");
+
+            boolean success;
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            success = connectivityManager.getActiveNetworkInfo().isAvailable();
+            OffRequest.getInstance().setNetwordState(success);
+        }
     }
 }
 

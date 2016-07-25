@@ -75,8 +75,7 @@ public class MainActivity extends AppCompatActivity implements IHandlerDo {
                             "test");
                 }
             });
-        OffRequest.getInstance().init(this);
-        OffRequest.getInstance().setDb(new DefaultOffDbImpl());
+        OffRequest.getInstance().init(this, new DefaultOffDbImpl());
         WeakHandler handler = new WeakHandler(this);
 
 
@@ -176,6 +175,12 @@ public class MainActivity extends AppCompatActivity implements IHandlerDo {
         TextView tvName = (TextView) findViewById(R.id.tv_name);
         assert tvName != null;
         tvName.setText(UserManager.getInstance().getUser().getNickname());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        OffRequest.getInstance().release();
     }
 
     private void test() {
