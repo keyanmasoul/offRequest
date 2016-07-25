@@ -1,10 +1,10 @@
 OffRequest  离线请求提交最简版
 ================
 
-----
-使用方法
 
+使用方法
 ---
+
 ## 1 初始化
 ```java
 OffRequest.getInstance().init(this);
