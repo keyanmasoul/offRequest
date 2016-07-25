@@ -1,11 +1,10 @@
-OffRequest
+OffRequest  离线请求提交最简版
 ================
-离线请求提交最简版
 
 ----
 使用方法
-----
 
+---
 ## 1 初始化
 ```java
 OffRequest.getInstance().init(this);
@@ -50,7 +49,13 @@ public class UserOffResponseImpl implements ImplOffResponse {
     }
 }
 ```
+
+原理
 ----
+离线添加请求时,通过传入的参数和数据源构造FakeData返回给用户.同时保存数据源类型,请求参数和回调实现类.在网络恢复时,读取请求数据逐条发送.
+数据库接口和服务器应答回调接口需自行实现
+
+
 备注
 ----
 简单的离线网络请求实现,复杂得多部请求需自行实现.
